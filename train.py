@@ -4,7 +4,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 # Evaulate model
-def eval_model(model, test_dataloader):
+def eval_model(model, dataset):
+    test_dataloader = DataLoader(dataset, shuffle=True)
+
     with torch.no_grad():
         correct_count = 0
         example_count = 0
@@ -18,6 +20,7 @@ def eval_model(model, test_dataloader):
             example_count += 1
     test_acc = correct_count / example_count
     print("Test Accuracy: ", f"{round((test_acc) * 100, 2)}%")
+    print("Example Count: ", example_count)
     return test_acc
 
 def train_model(model, dataset, learning_rate=0.01, num_epochs=10):

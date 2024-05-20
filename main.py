@@ -23,6 +23,30 @@ query = "In one word, describe what object is in this image"
 classes = ["cat", "cow", "dog", "elephant", "lion", "owl", "pig", "snake", "swan", "whale"]
 input_size=32000
 
+import torch
+import torchvision.transforms as transforms
+def init_model():
+    # Check if GPU available for LLM
+    torch.manual_seed(12)
+
+    if (not torch.cuda.is_available()):
+        print("\nNo GPU is available!")
+        print("[LLM attempt cancelled]\n")
+        raise SystemExit(0)
+
+    model_path = "liuhaotian/llava-v1.5-7b"
+    model_name = get_model_name_from_path(model_path)
+
+    print("\n Loading LLM model...\n")
+    tokenizer, model, image_processor = load_model(model_path, None)
+    init_model_vars(tokenizer, model, image_processor, model_path, model_name)
+    print("\n LLaVA Model loaded!\n")
+
+    # Retrieve the GPU device
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    disable_torch_init()
+
+
 def run_generate(dataset_directory, train_split=0.8):
     delete_folder_and_contents("./data/datasets")
 
@@ -51,12 +75,12 @@ def run_generate(dataset_directory, train_split=0.8):
                 annotated_image = save_image_with_text(image_path, text_animal, f"{output_image_path}/{output_filename}")
 
                 first_logit, tokens = get_first_logit(query, annotated_image)
-                print(tokens)
+                llm_class_name = "".join(tokenizer.batch_decode(torch.tensor(tokens[0:-1]), skip_special_tokens=True))
                 
                 tensor_path = f"{save_folder}/{output_filename}"
                 save_tensor(first_logit, tensor_path)
 
-                dataset_metadata.append([image_animal, text_animal, filename, "train" if is_train else "test", tensor_path])
+                dataset_metadata.append([image_animal, text_animal, filename, "train" if is_train else "test", tensor_path, llm_class_name])
 
     # Write CSV File
     with open("./data/datasets/metadata.csv", 'w') as csvfile:
@@ -98,6 +122,8 @@ def run_train(dataset_path):
 
 
 def run_eval(dataset_path):
+    num_classes = len(classes)
+
     # Load Models
     image_model = SimpleModel(input_size, 100, 100, 100, num_classes)
     text_model = SimpleModel(input_size, 1000, 1000, 1000, num_classes)
@@ -112,7 +138,9 @@ def run_eval(dataset_path):
     image_model.eval()
     text_model.eval()
 
+    print("--- Eval Image Model ---")
     image_test_acc = eval_model(image_model, image_dataset)
+    print("--- Eval Text Model ---")
     text_test_acc = eval_model(text_model, text_dataset)
     
     with open("./data/model/testing_acc.csv", 'w') as csvfile:
@@ -133,31 +161,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # Check if GPU available for LLM
-    import torch
-    import torchvision.transforms as transforms
-
-    torch.manual_seed(12)
-
-    if (not torch.cuda.is_available()):
-        print("\nNo GPU is available!")
-        print("[LLM attempt cancelled]\n")
-        raise SystemExit(0)
-
-    model_path = "liuhaotian/llava-v1.5-7b"
-    model_name = get_model_name_from_path(model_path)
-
-    print("\n Loading LLM model...\n")
-    tokenizer, model, image_processor = load_model(model_path, None)
-    init_model_vars(tokenizer, model, image_processor, model_path, model_name)
-    print("\n LLaVA Model loaded!\n")
-
-    # Retrieve the GPU device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    disable_torch_init()
-
 
     if (args.operation == "generate"):
+        init_model()
         run_generate(args.path)
     elif (args.operation == "train"):
         run_train(args.path)

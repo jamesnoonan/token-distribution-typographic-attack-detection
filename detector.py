@@ -39,7 +39,7 @@ class CustomTensorDataset(Dataset):
 
     def __getitem__(self, idx):
         filename = self.filenames[idx]
-        tensor = torch.load(self.tensor_dir + filename)
+        tensor = torch.load(self.tensor_dir + '/' + filename)
         label = self.__getlabel__(filename)
 
         if self.transform:
