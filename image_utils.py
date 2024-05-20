@@ -107,7 +107,7 @@ def insert_text(image, text, font_size=16, color=(0, 0, 0, 255), position="top")
     border_width = int(image_height * 1/7)
 
     try:
-	    font = ImageFont.truetype("./data/Roboto-Medium.ttf", font_size)
+	    font = ImageFont.truetype("./fonts/Roboto-Medium.ttf", font_size)
     except IOError:
         print("Could not load font, using default")
         font = ImageFont.load_default()

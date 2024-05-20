@@ -2,8 +2,11 @@ import argparse
 import random
 import csv
 from pathlib import Path
+
 from image_utils import make_folders, delete_folder_and_contents, save_image_with_text, find_images_in_folder
 from llm_utils import init_model_vars, save_tensor, get_first_logit, load_model
+from detector import SimpleModel, ImageTensorDataset, TextTensorDataset
+from train import train_model, eval_model
 
 # Import LLaVA Library
 import sys
@@ -15,8 +18,10 @@ from llava.utils import disable_torch_init
 
 random.seed(1234)
 
+# Constants
 query = "In one word, describe what object is in this image"
 classes = ["cat", "cow", "dog", "elephant", "lion", "owl", "pig", "snake", "swan", "whale"]
+input_size=32000
 
 def run_generate(dataset_directory, train_split=0.8):
     delete_folder_and_contents("./data/datasets")
@@ -45,7 +50,8 @@ def run_generate(dataset_directory, train_split=0.8):
                 output_filename = f"{image_animal}_{text_animal}_{filename}"
                 annotated_image = save_image_with_text(image_path, text_animal, f"{output_image_path}/{output_filename}")
 
-                first_logit = get_first_logit(query, annotated_image)
+                first_logit, tokens = get_first_logit(query, annotated_image)
+                print(tokens)
                 
                 tensor_path = f"{save_folder}/{output_filename}"
                 save_tensor(first_logit, tensor_path)
@@ -58,13 +64,61 @@ def run_generate(dataset_directory, train_split=0.8):
         csvwriter.writerows(dataset_metadata)
 
 
-def run_train():
+def run_train(dataset_path):
     delete_folder_and_contents("./data/model")
     make_folders("./data/model")
 
+    num_classes = len(classes)
 
-def run_eval():
-    pass
+    # Create models
+    image_model = SimpleModel(input_size, 100, 100, 100, num_classes)
+    text_model = SimpleModel(input_size, 1000, 1000, 1000, num_classes)
+
+    # Create datasets
+    image_dataset = ImageTensorDataset(f"{dataset_path}/train", classes)
+    text_dataset = TextTensorDataset(f"{dataset_path}/train", classes)
+
+    # Train both models
+    print("--- Training Image Model ---")
+    image_model_state, image_loss = train_model(image_model, image_dataset, learning_rate=0.001, num_epochs=20)
+
+    print("--- Training Text Model ---")
+    text_model_state, text_loss = train_model(text_model, text_dataset, learning_rate=0.001, num_epochs=20)
+    
+    # Save model states
+    torch.save(text_model_state, './data/model/text_model.pt')
+    torch.save(image_model_state, './data/model/image_model.pt')
+
+    with open("./data/model/training_loss.csv", 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        train_loss = [image_loss, text_loss]
+        writer.writerows(list(map(list, zip(*train_loss))))
+
+    print("Trained and Saved Models!")
+
+
+def run_eval(dataset_path):
+    # Load Models
+    image_model = SimpleModel(input_size, 100, 100, 100, num_classes)
+    text_model = SimpleModel(input_size, 1000, 1000, 1000, num_classes)
+
+    image_model.load_state_dict(torch.load("./data/model/image_model.pt"))
+    text_model.load_state_dict(torch.load("./data/model/text_model.pt"))
+
+    # Load Test Data
+    image_dataset = ImageTensorDataset(f"{dataset_path}/test", classes)
+    text_dataset = TextTensorDataset(f"{dataset_path}/test", classes)
+
+    image_model.eval()
+    text_model.eval()
+
+    image_test_acc = eval_model(image_model, image_dataset)
+    text_test_acc = eval_model(text_model, text_dataset)
+    
+    with open("./data/model/testing_acc.csv", 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        test_acc = [image_test_acc, text_test_acc]
+        writer.writerows([test_acc])
 
 
 if __name__ == "__main__":
