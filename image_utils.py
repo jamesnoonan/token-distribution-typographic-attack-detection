@@ -1,5 +1,6 @@
 import csv
 import os, shutil
+from pathlib import Path
 
 from PIL import Image
 from PIL import ImageDraw 
@@ -54,6 +55,11 @@ def delete_folder_contents(folder_path):
                 shutil.rmtree(file_path)
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
+def find_images_in_folder(directory_path):
+    pathlist = Path(directory_path).rglob('*.jpg')
+    return [str(path) for path in pathlist]
 
 
 def add_border(image, border_size=0.2): 

@@ -1,5 +1,6 @@
 from llava.eval.run_llava import load_image, load_images
 from llava.conversation import conv_templates, SeparatorStyle
+from llava.model.builder import load_pretrained_model
 from llava.utils import disable_torch_init
 from llava.mm_utils import (
     process_images,
@@ -68,6 +69,15 @@ def save_tensor_as_image(tensor, filename):
 
     pil_input_image = tensor_to_pil(tensor)
     pil_input_image.save(f"./data/text-fgsm/{filename}.jpg")
+
+
+def load_model(model_path, model_base):
+    model_name = get_model_name_from_path(model_path)
+    tokenizer, model, image_processor, context_len = load_pretrained_model(
+        model_path, model_base, model_name
+    )
+
+    return tokenizer, model, image_processor
 
 
 def preprocess_image(image_path):

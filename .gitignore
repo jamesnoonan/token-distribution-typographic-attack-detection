@@ -1,1 +1,4 @@
 data/
+llava_job.sh
+run_llava_script.sh
+__pycache__
