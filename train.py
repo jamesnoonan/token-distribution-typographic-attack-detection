@@ -34,17 +34,21 @@ def train_model(model, dataset, learning_rate=0.01, num_epochs=10):
     train_dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
 
     for epoch in range(num_epochs):
+        total_loss = 0
+        example_count = 0
         for i, (X_train, y_train) in enumerate(train_dataloader):
             y_predicted = model(X_train)
 
             loss = criterion(y_predicted, y_train)
             loss.backward()
 
-            training_loss.append(loss)
+            total_loss += loss[0]
+            example_count += 1
 
             optimizer.step()
             optimizer.zero_grad()
         
+        training_loss.append(total_loss / example_count)
         print(f'Epoch: {epoch+1}, loss = {loss.item():.4f}')
         print("\n")
 

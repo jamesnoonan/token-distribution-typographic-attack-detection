@@ -2,11 +2,13 @@ import argparse
 import random
 import csv
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 from image_utils import make_folders, delete_folder_and_contents, save_image_with_text, find_images_in_folder
 from llm_utils import init_model_vars, save_tensor, get_first_logit, load_model
 from detector import SimpleModel, ImageTensorDataset, TextTensorDataset
 from train import train_model, eval_model
+from graph import load_csv, compute_stats, graph_results, graph_training
 
 # Import LLaVA Library
 import sys
@@ -153,7 +155,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("main.py")
 
     # Positional Arguments
-    parser.add_argument("operation", choices=["generate", "train", "eval"], help="The operation to perform", type=str)
+    parser.add_argument("operation", choices=["generate", "train", "eval", "graph"], help="The operation to perform", type=str)
     parser.add_argument("path", help="The path to the input data", type=str)
 
     # Named Arguments
@@ -169,3 +171,10 @@ if __name__ == "__main__":
         run_train(args.path)
     elif (args.operation == "eval"):
         run_eval(args.path)
+    elif (args.operation == "graph"):
+        graph_training(args.path)
+        plt.clf()
+
+        # test_results = load_csv(args.path + "/" + )
+        # stats = compute_stats(test_results)
+        # graph_results(stats)
