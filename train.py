@@ -42,7 +42,7 @@ def train_model(model, dataset, learning_rate=0.01, num_epochs=10):
             loss = criterion(y_predicted, y_train)
             loss.backward()
 
-            total_loss += loss[0]
+            total_loss += loss.item()
             example_count += 1
 
             optimizer.step()

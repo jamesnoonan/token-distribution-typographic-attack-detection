@@ -67,21 +67,22 @@ def graph_results(data):
 def graph_training(data_folder):
     train_acc = load_csv(f"{data_folder}/training_loss.csv")
 
-    image_acc = [float(acc[0]) * 100 for acc in train_acc]
-    caption_acc = [float(acc[1]) * 100 for acc in train_acc]
+    image_acc = [float(acc[0]) for acc in train_acc]
+    caption_acc = [float(acc[1]) for acc in train_acc]
 
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(8, 5))
 
-    plt.plot(range(len(image_acc)), image_acc, color='cornflowerblue', linewidth=4)
-    plt.plot(range(len(caption_acc)), caption_acc, color='mediumseagreen', linewidth=4)
+    plt.plot([x+1 for x in range(len(image_acc))], image_acc, color='cornflowerblue', linewidth=4)
+    plt.plot([x+1 for x in range(len(caption_acc))], caption_acc, color='mediumseagreen', linewidth=4)
     plt.ylabel('Loss', fontsize=13)
     plt.xlabel('Epoch', fontsize=13)
-    plt.ylim(0, 102)
+    # plt.ylim(0, 102)
+    plt.xlim(0, 20)
     # add padding to bottom of figure
     plt.subplots_adjust(bottom=0.12)
 
-    plt.title('Training Loss Over Time', fontsize=16)
+    plt.title('Training Loss', fontsize=16)
 
-    plt.legend(['Image Prediction Model', 'Text Prediction Model'], loc='lower right')
+    plt.legend(['Image Prediction Model', 'Text Prediction Model'], loc='upper right')
 
     plt.savefig("./data/train_loss_graph.png")
