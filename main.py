@@ -27,7 +27,12 @@ input_size=32000
 
 import torch
 import torchvision.transforms as transforms
+
 def init_model():
+    global tokenizer
+    global model
+    global image_processor
+
     # Check if GPU available for LLM
     torch.manual_seed(12)
 

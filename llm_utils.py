@@ -204,7 +204,6 @@ def llava_generate(prompt, image_tensor_input):
             max_new_tokens=512,
             use_cache=True,
             return_dict_in_generate=True,
-            output_attentions=True,
             output_hidden_states=True,
             output_scores=True
         )
