@@ -74,7 +74,7 @@ def run_generate(dataset_directory, train_split=0.8, output_folder="./data/datas
             # Loop over classs to add text to image
             for text_animal in classes:
                 output_filename = f"{image_animal}_{text_animal}_{filename}"
-                annotated_image = save_image_with_text(image_path, text_animal, f"{output_image_path}/{output_filename}")
+                annotated_image = save_image_with_text(image_path, text_animal, f"{output_image_path}/{output_filename}", randomise_style=True)
 
                 first_logit, tokens = get_first_logit(query, annotated_image)
                 llm_class_name = "".join(tokenizer.batch_decode(torch.tensor(tokens[0:-1]), skip_special_tokens=True))
@@ -107,10 +107,10 @@ def run_train(dataset_path, image_model_size=100, text_model_size=100):
 
     # Train both models
     print("--- Training Image Model ---")
-    image_model_state, image_loss = train_model(image_model, image_dataset, learning_rate=0.001, num_epochs=30)
+    image_model_state, image_loss = train_model(image_model, image_dataset, learning_rate=0.001, num_epochs=40)
 
     print("--- Training Text Model ---")
-    text_model_state, text_loss = train_model(text_model, text_dataset, learning_rate=0.001, num_epochs=30)
+    text_model_state, text_loss = train_model(text_model, text_dataset, learning_rate=0.001, num_epochs=40)
     
     # Save model states
     torch.save(text_model_state, './data/model/text_model.pt')
@@ -124,7 +124,7 @@ def run_train(dataset_path, image_model_size=100, text_model_size=100):
     print("Trained and Saved Models!")
 
 
-def run_eval(dataset_path, image_model_size=100, text_model_size=100):
+def run_eval(dataset_path, image_model_size=200, text_model_size=200):
     num_classes = len(classes)
 
     # Load Models
