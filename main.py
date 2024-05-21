@@ -49,12 +49,12 @@ def init_model():
     disable_torch_init()
 
 
-def run_generate(dataset_directory, train_split=0.8):
-    delete_folder_and_contents("./data/datasets")
+def run_generate(dataset_directory, train_split=0.8, output_folder="./data/datasets"):
+    delete_folder_and_contents(output_folder)
 
-    output_image_path = "./data/datasets/images"
-    train_path = "./data/datasets/train"
-    test_path = "./data/datasets/test"
+    output_image_path = f"{output_folder}/images"
+    train_path = f"{output_folder}/train"
+    test_path = f"{output_folder}/test"
 
     make_folders(train_path)
     make_folders(test_path)
@@ -85,7 +85,7 @@ def run_generate(dataset_directory, train_split=0.8):
                 dataset_metadata.append([image_animal, text_animal, filename, "train" if is_train else "test", tensor_path, llm_class_name])
 
     # Write CSV File
-    with open("./data/datasets/metadata.csv", 'w') as csvfile:
+    with open(f"{output_folder}/metadata.csv", 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerows(dataset_metadata)
 
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     parser.add_argument("path", help="The path to the input data", type=str)
 
     # Named Arguments
-    # parser.add_argument("-o", "--output", help="The path to save the output to", type=str)
+    parser.add_argument("-o", "--output", nargs="?", const="./data/datasets", help="The path to save the output to", type=str)
     parser.add_argument("--text-model-size", nargs="?", const=100, help="The size of the hidden layers in the text model", type=int)
     parser.add_argument("--image-model-size", nargs="?", const=100, help="The size of the hidden layers in the image model", type=int)
 
@@ -169,7 +169,7 @@ if __name__ == "__main__":
 
     if (args.operation == "generate"):
         init_model()
-        run_generate(args.path)
+        run_generate(args.path, output_folder=args.output)
     elif (args.operation == "train"):
         run_train(args.path, image_model_size=args.image_model_size, text_model_size=args.text_model_size)
     elif (args.operation == "eval"):

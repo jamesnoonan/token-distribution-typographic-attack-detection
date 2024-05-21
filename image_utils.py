@@ -1,4 +1,5 @@
 import csv
+import random
 import os, shutil
 from pathlib import Path
 
@@ -124,7 +125,7 @@ def insert_text(image, text, font_size=16, color=(0, 0, 0, 255), position="top")
     return image
 
 
-def save_image_with_text(image_path, text, output_path, font_size=24):
+def save_image_with_text(image_path, text, output_path, font_size=24, randomise_style=False):
     """
     Load an image and save it with text to a new location
  
@@ -133,6 +134,7 @@ def save_image_with_text(image_path, text, output_path, font_size=24):
         text (string): The text to add to the image
         output_path (string): The path of the output file
         font_size (int): The sizing of the text
+        randomise_style (bool): Randomise the styling of the text
  
     Returns:
         string: The path of the saved image
@@ -141,7 +143,17 @@ def save_image_with_text(image_path, text, output_path, font_size=24):
     image = Image.open(image_path)
     border_image = add_border(image)
 
-    text_image = insert_text(border_image, text, font_size=font_size, color=(0, 0, 0, 255))
+    text_color=(0, 0, 0, 255)
+    text_size = font_size
+    text_position = "top"
+
+    if randomise_style:
+        colors = [(255, 0, 0, 255), (0, 255, 0, 255), (0, 0, 255, 255), (255, 255, 0, 255), (0, 0, 0, 255)]
+        text_color = random.choice(colors)
+        text_position = random.choice(["top", "bottom"])
+        text_size = random.randint(10, 64)
+
+    text_image = insert_text(border_image, text, font_size=text_size, color=text_color, position=text_position)
 
     # Save the image
     text_image.save(f"{output_path}.jpg")
