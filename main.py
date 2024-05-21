@@ -107,10 +107,10 @@ def run_train(dataset_path, image_model_size=100, text_model_size=100):
 
     # Train both models
     print("--- Training Image Model ---")
-    image_model_state, image_loss = train_model(image_model, image_dataset, learning_rate=0.001, num_epochs=20)
+    image_model_state, image_loss = train_model(image_model, image_dataset, learning_rate=0.001, num_epochs=30)
 
     print("--- Training Text Model ---")
-    text_model_state, text_loss = train_model(text_model, text_dataset, learning_rate=0.001, num_epochs=20)
+    text_model_state, text_loss = train_model(text_model, text_dataset, learning_rate=0.001, num_epochs=30)
     
     # Save model states
     torch.save(text_model_state, './data/model/text_model.pt')

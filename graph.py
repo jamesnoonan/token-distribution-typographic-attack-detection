@@ -77,7 +77,7 @@ def graph_training(data_folder):
     plt.ylabel('Loss', fontsize=13)
     plt.xlabel('Epoch', fontsize=13)
     # plt.ylim(0, 102)
-    plt.xlim(0, 20)
+    plt.xlim(0, 40)
     # add padding to bottom of figure
     plt.subplots_adjust(bottom=0.12)
 
