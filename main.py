@@ -90,15 +90,16 @@ def run_generate(dataset_directory, train_split=0.8):
         csvwriter.writerows(dataset_metadata)
 
 
-def run_train(dataset_path):
+def run_train(dataset_path, image_model_size=100, text_model_size=100):
+    print(f"Training with image model size of {image_model_size} and text model size of {text_model_size}")
     delete_folder_and_contents("./data/model")
     make_folders("./data/model")
 
     num_classes = len(classes)
 
     # Create models
-    image_model = SimpleModel(input_size, 100, 100, 100, num_classes)
-    text_model = SimpleModel(input_size, 1000, 1000, 1000, num_classes)
+    image_model = SimpleModel(input_size, image_model_size, image_model_size, image_model_size, num_classes)
+    text_model = SimpleModel(input_size, text_model_size, text_model_size, text_model_size, num_classes)
 
     # Create datasets
     image_dataset = ImageTensorDataset(f"{dataset_path}/train", classes)
@@ -123,12 +124,12 @@ def run_train(dataset_path):
     print("Trained and Saved Models!")
 
 
-def run_eval(dataset_path):
+def run_eval(dataset_path, image_model_size=100, text_model_size=100):
     num_classes = len(classes)
 
     # Load Models
-    image_model = SimpleModel(input_size, 100, 100, 100, num_classes)
-    text_model = SimpleModel(input_size, 1000, 1000, 1000, num_classes)
+    image_model = SimpleModel(input_size, image_model_size, image_model_size, image_model_size, num_classes)
+    text_model = SimpleModel(input_size, text_model_size, text_model_size, text_model_size, num_classes)
 
     image_model.load_state_dict(torch.load("./data/model/image_model.pt"))
     text_model.load_state_dict(torch.load("./data/model/text_model.pt"))
@@ -160,6 +161,8 @@ if __name__ == "__main__":
 
     # Named Arguments
     # parser.add_argument("-o", "--output", help="The path to save the output to", type=str)
+    parser.add_argument("--text-model-size", nargs="?", const=100, help="The size of the hidden layers in the text model", type=int)
+    parser.add_argument("--image-model-size", nargs="?", const=100, help="The size of the hidden layers in the image model", type=int)
 
     args = parser.parse_args()
 
@@ -168,9 +171,9 @@ if __name__ == "__main__":
         init_model()
         run_generate(args.path)
     elif (args.operation == "train"):
-        run_train(args.path)
+        run_train(args.path, image_model_size=args.image_model_size, text_model_size=args.text_model_size)
     elif (args.operation == "eval"):
-        run_eval(args.path)
+        run_eval(args.path, image_model_size=args.image_model_size, text_model_size=args.text_model_size)
     elif (args.operation == "graph"):
         graph_training(args.path)
         plt.clf()
