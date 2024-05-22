@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from image_utils import make_folders, delete_folder_and_contents, save_image_with_text, find_images_in_folder
 from detector import SimpleModel, ImageTensorDataset, TextTensorDataset
 from train import train_model, eval_model
-from graph import load_csv, compute_stats, graph_results, graph_training
+from graph import load_csv, compute_stats, graph_results, graph_training, compute_llm_acc
 
 import torch
 import torchvision.transforms as transforms
@@ -72,7 +72,7 @@ def run_generate(dataset_directory, train_split=0.8, output_folder="./data/datas
     dataset_metadata = []
 
     for image_animal in classes:
-        image_directory = dataset_directory + image_animal
+        image_directory = dataset_directory + "/" + image_animal
 
         for image_path in find_images_in_folder(image_directory):
             filename = (image_path.split("/")[-1]).split(".")[0]
@@ -83,7 +83,7 @@ def run_generate(dataset_directory, train_split=0.8, output_folder="./data/datas
             # Loop over classs to add text to image
             for text_animal in classes:
                 output_filename = f"{image_animal}_{text_animal}_{filename}"
-                annotated_image = save_image_with_text(image_path, text_animal, f"{output_image_path}/{output_filename}", randomise_style=True)
+                annotated_image = save_image_with_text(image_path, text_animal, f"{output_image_path}/{output_filename}", randomise_style=False)
 
                 first_logit, tokens = get_first_logit(query, annotated_image)
                 llm_class_name = "".join(tokenizer.batch_decode(torch.tensor(tokens[0:-1]), skip_special_tokens=True))
@@ -171,8 +171,8 @@ if __name__ == "__main__":
     # Named Arguments
     parser.add_argument("-o", "--output", nargs="?", const="./data/datasets", help="The path to save the output to", type=str)
     parser.add_argument("--train-split", nargs="?", const="0.8", help="The proportion of examples to use for training (a value from 0 to 1)", type=float)
-    parser.add_argument("--text-model-size", nargs="?", const=100, help="The size of the hidden layers in the text model", type=int)
-    parser.add_argument("--image-model-size", nargs="?", const=100, help="The size of the hidden layers in the image model", type=int)
+    parser.add_argument("--text-model-size", nargs="?", const=200, help="The size of the hidden layers in the text model", type=int)
+    parser.add_argument("--image-model-size", nargs="?", const=200, help="The size of the hidden layers in the image model", type=int)
 
     args = parser.parse_args()
 
@@ -191,6 +191,4 @@ if __name__ == "__main__":
         graph_training(args.path)
         plt.clf()
 
-        # test_results = load_csv(args.path + "/" + )
-        # stats = compute_stats(test_results)
-        # graph_results(stats)
+        compute_llm_acc("./data/datasets/metadata.csv")

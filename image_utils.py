@@ -152,6 +152,7 @@ def save_image_with_text(image_path, text, output_path, font_size=24, randomise_
         text_color = random.choice(colors)
         text_position = random.choice(["top", "bottom"])
         text_size = random.randint(10, 64)
+        output_path += f"_{text_size}"
 
     text_image = insert_text(border_image, text, font_size=text_size, color=text_color, position=text_position)
 
