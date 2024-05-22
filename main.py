@@ -5,18 +5,25 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 from image_utils import make_folders, delete_folder_and_contents, save_image_with_text, find_images_in_folder
-from llm_utils import init_model_vars, save_tensor, get_first_logit, load_model
 from detector import SimpleModel, ImageTensorDataset, TextTensorDataset
 from train import train_model, eval_model
 from graph import load_csv, compute_stats, graph_results, graph_training
+
+import torch
+import torchvision.transforms as transforms
 
 # Import LLaVA Library
 import sys
 import os
 sys.path.append(os.path.abspath('../LLaVA'))
 
-from llava.mm_utils import get_model_name_from_path
-from llava.utils import disable_torch_init
+
+# Handle case where LLaVA isn't installed
+llava_installed = Path('../LLaVA').is_dir()
+if llava_installed:
+    from llava.mm_utils import get_model_name_from_path
+    from llava.utils import disable_torch_init
+    from llm_utils import init_model_vars, save_tensor, get_first_logit, load_model
 
 random.seed(1234)
 
@@ -24,9 +31,6 @@ random.seed(1234)
 query = "In one word, describe what object is in this image"
 classes = ["cat", "cow", "dog", "elephant", "lion", "owl", "pig", "snake", "swan", "whale"]
 input_size=32000
-
-import torch
-import torchvision.transforms as transforms
 
 def init_model():
     global tokenizer
@@ -95,7 +99,7 @@ def run_generate(dataset_directory, train_split=0.8, output_folder="./data/datas
         csvwriter.writerows(dataset_metadata)
 
 
-def run_train(dataset_path, image_model_size=100, text_model_size=100):
+def run_train(dataset_path, image_model_size=200, text_model_size=200):
     print(f"Training with image model size of {image_model_size} and text model size of {text_model_size}")
     delete_folder_and_contents("./data/model")
     make_folders("./data/model")
@@ -174,8 +178,11 @@ if __name__ == "__main__":
 
 
     if (args.operation == "generate"):
-        init_model()
-        run_generate(args.path, output_folder=args.output, train_split=args.train_split)
+        if (not llava_installed):
+            print("LLaVA not found! Please install LLaVA to run this operation")
+        else:
+            init_model()
+            run_generate(args.path, output_folder=args.output, train_split=args.train_split)
     elif (args.operation == "train"):
         run_train(args.path, image_model_size=args.image_model_size, text_model_size=args.text_model_size)
     elif (args.operation == "eval"):
