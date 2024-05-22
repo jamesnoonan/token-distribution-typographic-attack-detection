@@ -166,6 +166,7 @@ if __name__ == "__main__":
 
     # Named Arguments
     parser.add_argument("-o", "--output", nargs="?", const="./data/datasets", help="The path to save the output to", type=str)
+    parser.add_argument("--train-split", nargs="?", const="0.8", help="The proportion of examples to use for training (a value from 0 to 1)", type=float)
     parser.add_argument("--text-model-size", nargs="?", const=100, help="The size of the hidden layers in the text model", type=int)
     parser.add_argument("--image-model-size", nargs="?", const=100, help="The size of the hidden layers in the image model", type=int)
 
@@ -174,7 +175,7 @@ if __name__ == "__main__":
 
     if (args.operation == "generate"):
         init_model()
-        run_generate(args.path, output_folder=args.output)
+        run_generate(args.path, output_folder=args.output, train_split=args.train_split)
     elif (args.operation == "train"):
         run_train(args.path, image_model_size=args.image_model_size, text_model_size=args.text_model_size)
     elif (args.operation == "eval"):
