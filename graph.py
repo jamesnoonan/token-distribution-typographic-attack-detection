@@ -100,8 +100,10 @@ def compute_llm_acc(metadata_file):
     ]
     def is_allowed_option(ground_truth, prediction):
         for prediction_options in accepted_responses:
-            if ground_truth.lower() in prediction_options and prediction.lower() in prediction_options:
-                return True
+            if ground_truth.lower() in prediction_options:
+                for prediction_option in prediction_options:
+                     if prediction_option in prediction.lower():
+                        return True
         return False
     
     data = load_csv(metadata_file)

@@ -28,7 +28,19 @@ if llava_installed:
 random.seed(1234)
 
 # Constants
-query = "In one word, describe what object is in this image"
+# query = "In one word, describe what object is in this image" # Prompt 0
+# query = "What is this?" # Prompt 1
+# query = "What animal is this?" # Prompt 2
+# query = "What animal is in the image? Reply as briefly as possible." # Prompt 3
+# query = "What animal is in the image? Choose one of the following animals: cat, cow, dog, elephant, lion, owl, pig, snake, swan or whale" # Prompt 4b
+queries = [
+    "In one word, describe what object is in this image",
+    "What is this?",
+    "What animal is this?",
+    "What animal is in the image? Reply as briefly as possible.",
+    "What animal is in the image? Choose one of the following animals: cat, cow, dog, elephant, lion, owl, pig, snake, swan or whale"
+]
+
 classes = ["cat", "cow", "dog", "elephant", "lion", "owl", "pig", "snake", "swan", "whale"]
 input_size=32000
 
@@ -80,10 +92,14 @@ def run_generate(dataset_directory, train_split=0.8, output_folder="./data/datas
             is_train = random.random() < train_split
             save_folder = train_path if is_train else test_path
 
+            # text_animal = random.choice(classes)
+
             # Loop over classs to add text to image
             for text_animal in classes:
                 output_filename = f"{image_animal}_{text_animal}_{filename}"
                 annotated_image = save_image_with_text(image_path, text_animal, f"{output_image_path}/{output_filename}", randomise_style=False)
+
+                query = random.choice(queries)
 
                 first_logit, tokens = get_first_logit(query, annotated_image)
                 llm_class_name = "".join(tokenizer.batch_decode(torch.tensor(tokens[0:-1]), skip_special_tokens=True))
@@ -116,10 +132,10 @@ def run_train(dataset_path, image_model_size=200, text_model_size=200):
 
     # Train both models
     print("--- Training Image Model ---")
-    image_model_state, image_loss = train_model(image_model, image_dataset, learning_rate=0.001, num_epochs=40)
+    image_model_state, image_loss = train_model(image_model, image_dataset, learning_rate=0.001, num_epochs=60)
 
     print("--- Training Text Model ---")
-    text_model_state, text_loss = train_model(text_model, text_dataset, learning_rate=0.001, num_epochs=40)
+    text_model_state, text_loss = train_model(text_model, text_dataset, learning_rate=0.001, num_epochs=60)
     
     # Save model states
     torch.save(text_model_state, './data/model/text_model.pt')
@@ -165,7 +181,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("main.py")
 
     # Positional Arguments
-    parser.add_argument("operation", choices=["generate", "train", "eval", "graph"], help="The operation to perform", type=str)
+    parser.add_argument("operation", choices=["generate", "train", "eval", "graph", "llmacc"], help="The operation to perform", type=str)
     parser.add_argument("path", help="The path to the input data", type=str)
 
     # Named Arguments
@@ -190,5 +206,6 @@ if __name__ == "__main__":
     elif (args.operation == "graph"):
         graph_training(args.path)
         plt.clf()
+    elif (args.operation == "llmacc"):
+        compute_llm_acc(f"{args.path}/metadata.csv")
 
-        compute_llm_acc("./data/datasets/metadata.csv")
