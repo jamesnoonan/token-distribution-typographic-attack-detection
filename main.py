@@ -28,11 +28,6 @@ if llava_installed:
 random.seed(1234)
 
 # Constants
-# query = "In one word, describe what object is in this image" # Prompt 0
-# query = "What is this?" # Prompt 1
-# query = "What animal is this?" # Prompt 2
-# query = "What animal is in the image? Reply as briefly as possible." # Prompt 3
-# query = "What animal is in the image? Choose one of the following animals: cat, cow, dog, elephant, lion, owl, pig, snake, swan or whale" # Prompt 4b
 queries = [
     "In one word, describe what object is in this image",
     "What is this?",
@@ -91,8 +86,6 @@ def run_generate(dataset_directory, train_split=0.8, output_folder="./data/datas
 
             is_train = random.random() < train_split
             save_folder = train_path if is_train else test_path
-
-            # text_animal = random.choice(classes)
 
             # Loop over classs to add text to image
             for text_animal in classes:
