@@ -1,5 +1,5 @@
 # Using Token Distributions to Detect Typographic Attacks on Large Language Models
-The code behind the paper *Using Token Distributions to Detect Typographic Attacks on Large Language Models*, which allows for the training prediction models to detect typographic attacks on Large Vision Language Models (LVLMs).
+The code behind the paper *Using Token Distributions to Detect Typographic Attacks on Large Language Models*, which allows for the training of prediction models to detect typographic attacks on Large Vision Language Models (LVLMs).
 
 ## Installation
 You must have LLaVA installed in a sibling directory named "LLaVA" to use this tool.
