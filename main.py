@@ -5,7 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 from image_utils import make_folders, delete_folder_and_contents, save_image_with_text, find_images_in_folder
-from detector import SimpleModel, ImageTensorDataset, TextTensorDataset
+from models import SimpleModel, ImageTensorDataset, TextTensorDataset
 from train import train_model, eval_model
 from stats import load_csv, compute_llm_acc
 
