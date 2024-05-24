@@ -266,7 +266,7 @@ if __name__ == "__main__":
         compute_llm_acc(f"{args.path}/metadata.csv")
 
     elif (args.operation == "train"): # Train prediction models
-        output = args.output if output is not None else "./data/model"
+        output = args.output if args.output is not None else "./data/model"
 
         run_train(args.path, output_folder=output, image_model_size=args.image_model_size, text_model_size=args.text_model_size, epochs=args.epochs)
 
